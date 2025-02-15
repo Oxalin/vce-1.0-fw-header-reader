@@ -36,7 +36,6 @@ header_version_minor = 0
 ip_version_major = 0
 ip_version_minor = 0
 ucode_version = 0
-# ucode_size_bytes = len(fileContent)
 ucode_size_bytes = 0
 ucode_array_offset_bytes = 0
 firmware_size_bytes = ucode_size_bytes + ucode_array_offset_bytes
@@ -76,12 +75,20 @@ with open(sys.argv[1], mode='rb') as input:
 
 # crc32_validation = payload_crc32_checksum(sys.argv[1])
 
+# Interpret ucode_version as version major, minor, binary_id
+# ucode's format is 32 bits as version_major 12 bits | version_minor 12 bits | binary_id 8 bits
+# TODO: Do we have to consider the endianness?
+version_major = int((ucode_version >> 20) & 0x0fff)
+version_minor = int((ucode_version >> 8) & 0x0fff)
+binary_id = int(ucode_version & 0x00ff)
+
 print ("Header's properties read from VCE 1.0 firmware upgraded file [{}]".format(sys.argv[1]))
-# print ("Total size of new firmware [{}]: {}B [uint32]".format(sys.argv[2], firmware_size_bytes))
+print ("Total size of the upgraded firmware [{}]: {}B [uint32]".format(sys.argv[1], firmware_size_bytes))
 print ("Header's size: {}B [uint32]".format(header_size_bytes))
 print ("Header's version: {}.{} [2*uint16]]".format(header_version_major, header_version_minor))
 print ("IP [VCE] version: {}.{} [2*uint16]".format(ip_version_major, ip_version_minor))
 print ("uCode version: {} [uint32]".format(ucode_version))
+print("    Interpreted uCode version: {}.{}.{}".format(version_major, version_minor, binary_id))
 print ("uCode's size: {}B [uint32]".format(ucode_size_bytes))
 print ("uCode's offset: {}B [uint32]".format(ucode_array_offset_bytes))
 print ("uCode's CRC32 checksum: {} [uint32]".format(crc32))
